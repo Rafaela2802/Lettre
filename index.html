@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#e8dfd1">
+<title>Un petit mot 🤍</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&display=swap');
+
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{
+  background:radial-gradient(circle at 50% 25%,#faf6ef 0,#eee5d8 58%,#ded0bd 100%);
+  color:#51473e;
+  font-family:Georgia,"Times New Roman",serif;
+}
+#app{width:100%;height:100%;position:relative}
+.page{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+  opacity:0;pointer-events:none;
+  transform:translateY(8px);
+  transition:opacity .75s ease,transform .75s ease;
+}
+.page.active{opacity:1;pointer-events:auto;transform:none}
+.tap{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.hint{
+  position:absolute;bottom:max(22px,env(safe-area-inset-bottom));
+  left:50%;transform:translateX(-50%);
+  font-size:14px;opacity:.58;white-space:nowrap;
+}
+
+/* ENVELOPPE */
+.envelope{
+  position:relative;width:min(88vw,430px);aspect-ratio:1.55;
+  filter:drop-shadow(0 16px 22px rgba(72,55,38,.18));
+}
+.env-back{
+  position:absolute;inset:0;border-radius:8px;
+  background:linear-gradient(145deg,#eadbc5,#d5c0a3);
+  box-shadow:inset 0 0 0 1px #c9b394;
+}
+.left,.right{
+  position:absolute;bottom:0;width:56%;height:100%;
+  background:#dfccb0;z-index:2;
+}
+.left{left:0;clip-path:polygon(0 100%,100% 100%,0 8%)}
+.right{right:0;clip-path:polygon(100% 100%,0 100%,100% 8%)}
+.front{
+  position:absolute;left:0;bottom:0;width:100%;height:69%;
+  background:#e4d2b7;
+  clip-path:polygon(0 100%,0 20%,50% 73%,100% 20%,100% 100%);
+  z-index:6;
+}
+.flap{
+  position:absolute;left:0;top:0;width:100%;height:64%;
+  background:linear-gradient(180deg,#eadcc8,#d8c5a7);
+  clip-path:polygon(0 0,100% 0,50% 100%);
+  transform-origin:50% 0;
+  z-index:7;
+  transition:transform 1s cubic-bezier(.65,0,.25,1);
+}
+.seal{
+  position:absolute;left:50%;top:53%;transform:translate(-50%,-50%);
+  width:58px;height:58px;border-radius:50%;z-index:9;
+  background:#93664f;color:#f6eadb;
+  display:grid;place-items:center;font-size:23px;
+  box-shadow:0 3px 7px rgba(80,50,35,.22);
+  transition:opacity .35s;
+}
+.open .flap{transform:rotateX(180deg)}
+.open .seal{opacity:0}
+
+/* BILLET QUI SORT */
+.ticket{
+  position:absolute;
+  left:50%;top:12%;
+  width:78%;height:78%;
+  transform:translateX(-50%) translateY(110px);
+  opacity:0;
+  z-index:4;
+  background:#f7efdf;
+  box-shadow:0 12px 25px rgba(70,55,40,.14);
+  transition:transform 1s cubic-bezier(.2,.75,.2,1),opacity .5s;
+}
+.open .ticket{opacity:1;transform:translateX(-50%) translateY(0)}
+.ticket-text{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  padding:25px;
+  font-family:"Caveat","Segoe Print","Bradley Hand",cursive;
+  text-align:center;font-size:clamp(18px,4.8vw,27px);
+  line-height:1.25;
+}
+
+/* GRAND BILLET */
+.note{
+  width:min(84vw,470px);
+  padding:52px 38px 48px;
+  background:#f7efdf;
+  box-shadow:0 13px 30px rgba(70,55,40,.13);
+  transform:rotate(-.35deg);
+}
+.note-text{
+  font-family:"Caveat","Segoe Print","Bradley Hand",cursive;
+  font-size:clamp(25px,6vw,34px);
+  line-height:1.32;text-align:center;
+}
+.note-text p{margin:0 0 25px}
+.note-text p:last-child{margin-bottom:0}
+
+/* FIN */
+.final{flex-direction:column;text-align:center}
+.rose{
+  width:min(180px,48vw);height:300px;margin-bottom:4px;
+  display:flex;align-items:center;justify-content:center;
+}
+.rose img{
+  width:100%;height:100%;object-fit:contain;
+  filter:drop-shadow(0 9px 12px rgba(75,55,40,.14));
+}
+.final h1{
+  margin:0 0 18px;
+  font-family:"Caveat","Segoe Print","Bradley Hand",cursive;
+  font-size:clamp(34px,8vw,46px);font-weight:400;
+}
+.final p{margin:5px 0;font-size:20px}
+.reset{
+  margin-top:28px;border:0;background:#d9c7ae;color:#51473e;
+  padding:10px 18px;border-radius:20px;font-family:inherit;
+}
+
+/* petite enveloppe décorative au début */
+.corner-note{
+  position:absolute;top:10px;left:50%;transform:translateX(-50%);
+  font-family:"Caveat",cursive;font-size:24px;opacity:.55;
+}
+@media(max-width:380px){
+  .note{width:88vw;padding:42px 24px 40px}
+  .note-text{font-size:24px}
+  .note-text p{margin-bottom:21px}
+}
+
+/* Mise en page finale : texte complet sur une seule feuille, uniquement en plus petit */
+.note{
+  width:min(90vw,470px)!important;
+  height:min(91vh,760px)!important;
+  padding:30px 25px 24px!important;
+  overflow:hidden!important;
+}
+.note-text{
+  font-family:"Caveat","Segoe Print","Bradley Hand",cursive!important;
+  font-size:18px!important;
+  line-height:1.12!important;
+  text-align:left!important;
+  width:100%!important;
+}
+.note-text p{margin:0 0 9px!important}
+.note-text .name{
+  text-align:center!important;
+  font-size:27px!important;
+  margin:0 0 16px!important;
+}
+.note-text .last{text-align:center!important;margin-top:12px!important}
+@media(max-width:390px){
+  .note{width:92vw!important;height:92vh!important;padding:25px 20px 20px!important}
+  .note-text{font-size:16px!important;line-height:1.10!important}
+  .note-text .name{font-size:25px!important;margin-bottom:13px!important}
+  .note-text p{margin-bottom:7px!important}
+}
+
+/* Mobile safe-area correction: keep the whole letter below the phone/browser top area. */
+@media (max-width: 600px) {
+  .page {
+    align-items: flex-start !important;
+    justify-content: center !important;
+    padding-top: max(18px, env(safe-area-inset-top)) !important;
+    padding-bottom: max(18px, env(safe-area-inset-bottom)) !important;
+    min-height: 100dvh !important;
+    height: 100dvh !important;
+  }
+  .note {
+    margin-top: 0 !important;
+    transform: none !important;
+    max-height: calc(100dvh - max(36px, env(safe-area-inset-top) + env(safe-area-inset-bottom))) !important;
+  }
+}
+
+
+/* Derniers ajustements mobile : enveloppe et fin centrées */
+@media (max-width:600px){
+  #page1, #page2{
+    align-items:center !important;
+    justify-content:center !important;
+  }
+  #page1 > .tap, #page2 > .tap{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+  }
+  #page1 .hint, #page2 .hint{
+    width:100%;
+    text-align:center;
+  }
+  #page4.final{
+    align-items:center !important;
+    justify-content:center !important;
+    text-align:center !important;
+    padding-top:max(18px,env(safe-area-inset-top)) !important;
+    padding-bottom:max(18px,env(safe-area-inset-bottom)) !important;
+  }
+  #page4 .rose{
+    margin-left:auto !important;
+    margin-right:auto !important;
+  }
+  #page4 h1, #page4 p{
+    width:100%;
+    text-align:center !important;
+  }
+}
+
+</style>
+</head>
+<body>
+<div id="app">
+
+<section class="page active" id="page1">
+  <div class="tap" onclick="openEnvelope()">
+    <div class="envelope">
+      <div class="env-back"></div>
+      <div class="left"></div><div class="right"></div>
+      <div class="ticket">
+        <div class="ticket-text">Un petit mot pour toi 🤍</div>
+      </div>
+      <div class="flap"></div><div class="front"></div>
+      <div class="seal">♥</div>
+    </div>
+    <div class="hint">Clique sur l’enveloppe pour l’ouvrir 🤍</div>
+  </div>
+</section>
+
+<section class="page" id="page2">
+  <div class="tap" onclick="showNote()">
+    <div class="envelope open">
+      <div class="env-back"></div>
+      <div class="left"></div><div class="right"></div>
+      <div class="ticket">
+        <div class="ticket-text">Un petit mot pour toi 🤍</div>
+      </div>
+      <div class="flap"></div><div class="front"></div>
+    </div>
+    <div class="hint">Le petit mot est là…</div>
+  </div>
+</section>
+
+<section class="page" id="page3">
+  <div class="tap" onclick="showFinal()">
+    <div class="note">
+      <div class="note-text">
+        <p class="name">Léa 🤍</p>
+        <p>Je sais qu’aujourd’hui, ça ne sera pas facile.</p>
+        <p>Je ne vais pas prétendre pouvoir enlever ta peine, ni trouver les mots magiques pour rendre les choses plus simples. J’aimerais juste que tu te rappelles d’une petite chose : tu n’as pas besoin d’être forte tout le temps.</p>
+        <p>Si tu as envie de pleurer, pleure. Si tu as besoin de silence, prends-le. Si tu as besoin de rire pour penser à autre chose, fais-le. Tu as simplement besoin de traverser la journée comme tu peux, à ta manière…</p>
+        <p>Je voulais simplement déposer ici un petit peu de douceur pour toi, pour aujourd’hui. 🤍</p>
+        <p>Et à un moment, si tu ressens le besoin de sourire, lève les yeux vers le ciel.</p>
+        <p>Ta mamie sera là-haut, en train de te sourire. 🤍</p>
+        <p>Alors souris-lui en retour. Je suis sûre qu’elle aimerait le voir.</p>
+        <p class="last">Prends soin de toi.</p>
+      </div>
+    </div>
+    <div class="hint">🤍</div>
+  </div>
+</section>
+
+<section class="page final" id="page4">
+  <div class="rose"><img src="rose_blanche.png" alt="Une rose blanche"></div>
+  <h1>Tu es belle. 🤍</h1>
+  <p>Courage pour aujourd’hui.</p>
+  <p>Prends soin de toi.</p>
+  <p>— Moi ❤️</p>
+</section>
+
+</div>
+<script>
+let timer;
+function switchPage(n){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page'+n).classList.add('active');
+}
+function openEnvelope(){
+  document.querySelector('#page1 .envelope').classList.add('open');
+  clearTimeout(timer);
+  timer=setTimeout(()=>switchPage(2),1000);
+}
+function showNote(){switchPage(3)}
+function showFinal(){switchPage(4)}
+function restart(){switchPage(1)}
+</script>
+</body>
+</html>
